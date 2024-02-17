@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/HOCKNAS/demo-app/internal/app"
 	"github.com/HOCKNAS/demo-app/internal/core/domain"
@@ -26,6 +27,8 @@ func main() {
 		Repos: repositories,
 	})
 
+	fmt.Println(banner())
+
 	user, err := services.Users.Register(context.Background(), &domain.User{
 		Name:     "Santiago",
 		LastName: "Chacon",
@@ -40,5 +43,20 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println(user)
+	if user != nil {
+		fmt.Println(user)
+	}
+}
+
+func banner() string {
+	bannerPath := os.Getenv("BANNER_PATH")
+	if bannerPath == "" {
+		bannerPath = "resources/banner.txt"
+	}
+
+	b, err := os.ReadFile(bannerPath)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
