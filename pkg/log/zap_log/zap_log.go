@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func NewLogger(rawJSON []byte) *zap.Logger {
@@ -11,5 +12,7 @@ func NewLogger(rawJSON []byte) *zap.Logger {
 	if err := json.Unmarshal(rawJSON, &cfg); err != nil {
 		panic(err)
 	}
-	return zap.Must(cfg.Build())
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	cfg.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+	return zap.Must(cfg.Build(zap.AddCaller(), zap.AddCallerSkip(1)))
 }

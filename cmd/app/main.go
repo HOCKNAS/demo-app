@@ -49,7 +49,9 @@ func main() {
 			"encoderConfig": {
 			  "messageKey": "message",
 			  "levelKey": "level",
-			  "levelEncoder": "lowercase"
+			  "levelEncoder": "lowercase",
+			  "timeKey": "ts",
+			  "callerKey": "caller"
 			}
 		  }`
 
