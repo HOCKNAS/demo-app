@@ -7,7 +7,7 @@ import (
 
 	"github.com/HOCKNAS/demo-app/internal/app"
 	"github.com/HOCKNAS/demo-app/internal/core/domain"
-	"github.com/HOCKNAS/demo-app/pkg/auth/firebase_auth"
+	firebaseauth "github.com/HOCKNAS/demo-app/pkg/auth/firebase_auth"
 	"github.com/HOCKNAS/demo-app/pkg/database/mongodb"
 	"github.com/sirupsen/logrus"
 )
@@ -23,7 +23,7 @@ func main() {
 	db := mongoClient.Database("demo-app")
 
 	//firebase
-	firebaseApp, err := firebase_auth.NewApp(firebaseConfigFile())
+	firebaseApp, err := firebaseauth.NewApp(firebaseConfigFile())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -33,18 +33,37 @@ func main() {
 	}
 
 	//logger
-	config := &logrus.TextFormatter{
+	configlogrus := &logrus.TextFormatter{
 		ForceColors:     true,
 		FullTimestamp:   true,
 		DisableQuote:    true,
 		TimestampFormat: "2006-01-02T15:04:05.000000000",
 	}
 
+	configzap := `{
+			"level": "debug",
+			"encoding": "json",
+			"outputPaths": ["stdout", "/tmp/logs"],
+			"errorOutputPaths": ["stderr"],
+			"initialFields": {"app": "demo-app"},
+			"encoderConfig": {
+			  "messageKey": "message",
+			  "levelKey": "level",
+			  "levelEncoder": "lowercase"
+			}
+		  }`
+
+	config := &app.LoggerConfig{
+		UseLogger:    "zap",
+		ZapConfig:    configzap,
+		LogrusConfig: configlogrus,
+	}
+
 	identity_provider := app.NewIdentityProviders(authClient)
 
 	repositories := app.NewRepositories(db)
 
-	logger := app.NewLoggers(config)
+	logger := app.NewLoggers(*config)
 
 	services := app.NewServices(app.Deps{
 		Repos:            repositories,

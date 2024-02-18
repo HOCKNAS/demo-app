@@ -13,4 +13,6 @@ var (
 	ErrDatabase                   = errors.New("Error en el Repositorio")
 	ErrUserAlreadyDeactivatedIdP  = errors.New("El usuario ya está desactivado en el Proveedor de Identidad")
 	ErrUserAlreadyDeactivatedDB   = errors.New("El usuario ya está desactivado en el Repositorio")
+	ErrLogrusConfigNotProvided    = errors.New("La configuración de Logrus no se ha suministrado")
+	ErrZapConfigNotProvided       = errors.New("La configuración de Zap no se ha suministrado")
 )
