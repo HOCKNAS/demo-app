@@ -9,6 +9,7 @@ import (
 	"github.com/HOCKNAS/demo-app/internal/core/domain"
 	"github.com/HOCKNAS/demo-app/pkg/auth/firebase_auth"
 	"github.com/HOCKNAS/demo-app/pkg/database/mongodb"
+	"github.com/sirupsen/logrus"
 )
 
 const uri = "mongodb://172.16.1.100:32120"
@@ -31,13 +32,22 @@ func main() {
 		fmt.Println(err)
 	}
 
+	//logger
+	config := &logrus.TextFormatter{
+		ForceColors:   true,
+		FullTimestamp: true,
+	}
+
 	identity_provider := app.NewIdentityProvider(authClient)
 
 	repositories := app.NewRepositories(db)
 
+	logger := app.NewLogger(config)
+
 	services := app.NewServices(app.Deps{
 		Repos:            repositories,
 		IdentityProvider: identity_provider,
+		Logger:           logger,
 	})
 
 	fmt.Println(banner())
@@ -51,26 +61,20 @@ func main() {
 		IsAdmin:  false,
 		IsActive: true,
 	})
-
-	deactivate, err := services.Users.DeactivateUser(context.Background(), user.ID)
-
-	eliminar := services.Users.DeleteUser(context.Background(), user.ID)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	if user != nil {
 		fmt.Println(user.Email)
 	}
 
+	deactivate, _ := services.Users.DeactivateUser(context.Background(), user.ID)
 	if deactivate != nil {
 		fmt.Println(deactivate.IsActive)
 	}
 
+	eliminar := services.Users.DeleteUser(context.Background(), user.ID)
 	if eliminar != nil {
 		fmt.Println(eliminar)
 	}
+
 }
 
 func banner() string {

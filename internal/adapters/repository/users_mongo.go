@@ -167,12 +167,16 @@ func (r *usersRepository) GetByID(ctx context.Context, id string) (*domain.User,
 }
 
 func (r *usersRepository) Deactivate(ctx context.Context, id string) (*domain.User, error) {
-	_, err := r.GetByID(ctx, id)
+	userExist, err := r.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFoundDB) {
 			return nil, fmt.Errorf("%w con ID: %s", domain.ErrUserNotFoundDB, id)
 		}
 		return nil, fmt.Errorf("%w al verificar el usuario con ID: %s", domain.ErrDatabase, id)
+	}
+
+	if userExist.IsActive == false {
+		return nil, domain.ErrUserAlreadyDeactivatedDB
 	}
 
 	filter := bson.M{"_id": id}
