@@ -7,11 +7,11 @@ import (
 )
 
 type IdentityProvider struct {
-	AuthManager ports.AuthManager
+	Users ports.AuthManager
 }
 
-func NewIdentityProvider(authClient *auth.Client) *IdentityProvider {
+func NewIdentityProviders(authClient *auth.Client) *IdentityProvider {
 	return &IdentityProvider{
-		AuthManager: identityprovider.NewIdentityProvider(authClient),
+		Users: identityprovider.NewIdentityProvider(authClient),
 	}
 }

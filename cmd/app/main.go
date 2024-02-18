@@ -34,15 +34,17 @@ func main() {
 
 	//logger
 	config := &logrus.TextFormatter{
-		ForceColors:   true,
-		FullTimestamp: true,
+		ForceColors:     true,
+		FullTimestamp:   true,
+		DisableQuote:    true,
+		TimestampFormat: "2006-01-02T15:04:05.000000000",
 	}
 
-	identity_provider := app.NewIdentityProvider(authClient)
+	identity_provider := app.NewIdentityProviders(authClient)
 
 	repositories := app.NewRepositories(db)
 
-	logger := app.NewLogger(config)
+	logger := app.NewLoggers(config)
 
 	services := app.NewServices(app.Deps{
 		Repos:            repositories,
@@ -52,7 +54,7 @@ func main() {
 
 	fmt.Println(banner())
 
-	user, err := services.Users.CreateUser(context.Background(), &domain.User{
+	user, _ := services.Users.CreateUser(context.Background(), &domain.User{
 		Name:     "Santiago",
 		LastName: "Chacon",
 		Username: "hocknas",
