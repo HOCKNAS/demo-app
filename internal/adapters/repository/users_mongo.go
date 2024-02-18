@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/HOCKNAS/demo-app/internal/core/domain"
@@ -148,4 +150,46 @@ func (r *usersRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (r *usersRepository) GetByID(ctx context.Context, id string) (*domain.User, error) {
+	var mongoUser toUserMongo
+	filter := bson.M{"_id": id}
+	err := r.db.FindOne(ctx, filter).Decode(&mongoUser)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("%w con ID: %s", domain.ErrUserNotFoundDB, id)
+		}
+		return nil, fmt.Errorf("%w al buscar el usuario con ID: %s, error: %v", domain.ErrDatabase, id, err)
+	}
+
+	return mongoUser.ToDomain(), err
+}
+
+func (r *usersRepository) Deactivate(ctx context.Context, id string) (*domain.User, error) {
+	_, err := r.GetByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFoundDB) {
+			return nil, fmt.Errorf("%w con ID: %s", domain.ErrUserNotFoundDB, id)
+		}
+		return nil, fmt.Errorf("%w al verificar el usuario con ID: %s", domain.ErrDatabase, id)
+	}
+
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": bson.M{"isActive": false}}
+	result, err := r.db.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, fmt.Errorf("%w al desactivar el usuario con ID: %s", domain.ErrDatabase, id)
+	}
+
+	if result.MatchedCount == 0 {
+		return nil, fmt.Errorf("%w con ID: %s", domain.ErrUserNotFoundDB, id)
+	}
+
+	updatedUser, err := r.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("%w al recargar el usuario desactivado con ID: %s", domain.ErrDatabase, id)
+	}
+
+	return updatedUser, err
 }

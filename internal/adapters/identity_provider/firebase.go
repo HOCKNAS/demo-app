@@ -13,15 +13,6 @@ type firebaseIdentityProvider struct {
 	authClient *auth.Client
 }
 
-func userToFirebase(user *domain.User) *auth.UserToCreate {
-	return (&auth.UserToCreate{}).
-		UID(user.ID).
-		Password(user.Password).
-		DisplayName(user.Username).
-		Email(user.Email).
-		EmailVerified(false)
-}
-
 func NewIdentityProvider(authClient *auth.Client) ports.AuthManager {
 	return &firebaseIdentityProvider{
 		authClient: authClient,
@@ -30,7 +21,12 @@ func NewIdentityProvider(authClient *auth.Client) ports.AuthManager {
 
 func (fip *firebaseIdentityProvider) Create(ctx context.Context, user *domain.User) error {
 
-	params := userToFirebase(user)
+	params := (&auth.UserToCreate{}).
+		UID(user.ID).
+		Password(user.Password).
+		DisplayName(user.Username).
+		Email(user.Email).
+		EmailVerified(false)
 
 	_, err := fip.authClient.CreateUser(ctx, params)
 
@@ -44,6 +40,30 @@ func (fip *firebaseIdentityProvider) Create(ctx context.Context, user *domain.Us
 func (fip *firebaseIdentityProvider) Delete(ctx context.Context, id string) error {
 
 	err := fip.authClient.DeleteUser(ctx, id)
+
+	if err != nil {
+		return firebase_auth.ShowError(err)
+	}
+
+	return nil
+}
+
+func (fip *firebaseIdentityProvider) GetByID(ctx context.Context, id string) error {
+
+	_, err := fip.authClient.GetUser(ctx, id)
+
+	if err != nil {
+		return firebase_auth.ShowError(err)
+	}
+
+	return nil
+}
+
+func (fip *firebaseIdentityProvider) Deactivate(ctx context.Context, id string) error {
+	params := (&auth.UserToUpdate{}).
+		Disabled(true)
+
+	_, err := fip.authClient.UpdateUser(ctx, id, params)
 
 	if err != nil {
 		return firebase_auth.ShowError(err)

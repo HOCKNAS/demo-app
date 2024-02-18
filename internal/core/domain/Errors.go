@@ -9,4 +9,6 @@ var (
 	ErrUserNotFoundForDeletionIdP = errors.New("No se encontró el usuario para eliminar en el proveedor de identidad")
 	ErrCreationFailedIdP          = errors.New("Falló la creación en el proveedor de identidad")
 	ErrDeletionFailedIdP          = errors.New("Falló la eliminación en el proveedor de identidad, se requiere acción manual")
+	ErrUserNotFoundDB             = errors.New("No se encontró el usuario en la Base de Datos")
+	ErrDatabase                   = errors.New("Error en la Base de Datos")
 )
