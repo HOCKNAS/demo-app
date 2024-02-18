@@ -42,7 +42,7 @@ func main() {
 
 	fmt.Println(banner())
 
-	user, err := services.Users.CreateAccount(context.Background(), &domain.User{
+	user, err := services.Users.CreateUser(context.Background(), &domain.User{
 		Name:     "Santiago",
 		LastName: "Chacon",
 		Username: "hocknas",
@@ -52,16 +52,12 @@ func main() {
 		IsActive: true,
 	})
 
-	deactivate, err := services.Users.DeactivateAccount(context.Background(), user.ID)
+	deactivate, err := services.Users.DeactivateUser(context.Background(), user.ID)
 
-	eliminar := services.Users.DeleteAccount(context.Background(), user.ID)
+	eliminar := services.Users.DeleteUser(context.Background(), user.ID)
 
 	if err != nil {
 		fmt.Println(err)
-	}
-
-	if eliminar != nil {
-		fmt.Println(eliminar)
 	}
 
 	if user != nil {
@@ -70,6 +66,10 @@ func main() {
 
 	if deactivate != nil {
 		fmt.Println(deactivate.IsActive)
+	}
+
+	if eliminar != nil {
+		fmt.Println(eliminar)
 	}
 }
 

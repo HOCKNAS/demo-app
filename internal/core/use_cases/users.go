@@ -20,7 +20,7 @@ func NewUserService(repository ports.UsersRepository, identity_provider ports.Au
 	}
 }
 
-func (service *userService) CreateAccount(ctx context.Context, user *domain.User) (*domain.User, error) {
+func (service *userService) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 
 	userDatabase, err := service.repository.Create(ctx, user)
 
@@ -40,7 +40,7 @@ func (service *userService) CreateAccount(ctx context.Context, user *domain.User
 	return userDatabase, err
 }
 
-func (service *userService) DeleteAccount(ctx context.Context, id string) error {
+func (service *userService) DeleteUser(ctx context.Context, id string) error {
 
 	err := service.repository.Delete(ctx, id)
 
@@ -56,14 +56,8 @@ func (service *userService) DeleteAccount(ctx context.Context, id string) error 
 	return nil
 }
 
-func (service *userService) GetAccount(ctx context.Context, id string) (*domain.User, error) {
+func (service *userService) GetUser(ctx context.Context, id string) (*domain.User, error) {
 	userDatabase, err := service.repository.GetByID(ctx, id)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = service.identity_provider.GetByID(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -72,7 +66,7 @@ func (service *userService) GetAccount(ctx context.Context, id string) (*domain.
 	return userDatabase, err
 }
 
-func (service *userService) DeactivateAccount(ctx context.Context, id string) (*domain.User, error) {
+func (service *userService) DeactivateUser(ctx context.Context, id string) (*domain.User, error) {
 	userDatabase, err := service.repository.Deactivate(ctx, id)
 
 	if err != nil {

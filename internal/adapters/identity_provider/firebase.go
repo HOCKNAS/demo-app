@@ -48,22 +48,22 @@ func (fip *firebaseIdentityProvider) Delete(ctx context.Context, id string) erro
 	return nil
 }
 
-func (fip *firebaseIdentityProvider) GetByID(ctx context.Context, id string) error {
+func (fip *firebaseIdentityProvider) Deactivate(ctx context.Context, id string) error {
 
-	_, err := fip.authClient.GetUser(ctx, id)
+	userRecord, err := fip.authClient.GetUser(ctx, id)
 
 	if err != nil {
 		return firebase_auth.ShowError(err)
 	}
 
-	return nil
-}
+	if userRecord.Disabled {
+		return domain.ErrUserAlreadyDeactivatedIdP
+	}
 
-func (fip *firebaseIdentityProvider) Deactivate(ctx context.Context, id string) error {
 	params := (&auth.UserToUpdate{}).
 		Disabled(true)
 
-	_, err := fip.authClient.UpdateUser(ctx, id, params)
+	_, err = fip.authClient.UpdateUser(ctx, id, params)
 
 	if err != nil {
 		return firebase_auth.ShowError(err)
