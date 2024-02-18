@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/HOCKNAS/demo-app/internal/core/domain"
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
@@ -28,6 +29,13 @@ func (service *userService) CreateAccount(ctx context.Context, input *domain.Use
 	}
 
 	err = service.identity_provider.Create(ctx, userDatabase)
+	if err != nil {
+		deleteErr := service.repository.Delete(ctx, userDatabase.ID)
+		if deleteErr != nil {
+			return nil, fmt.Errorf("%w; falló la compensación (eliminación del usuario): %v", domain.ErrCreationFailedIdP, deleteErr)
+		}
+		return nil, err
+	}
 
 	return userDatabase, err
 }
@@ -41,9 +49,8 @@ func (service *userService) DeleteAccount(ctx context.Context, id string) error 
 	}
 
 	err = service.identity_provider.Delete(ctx, id)
-
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", domain.ErrDeletionFailedIdP, err)
 	}
 
 	return nil

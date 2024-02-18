@@ -42,7 +42,7 @@ func main() {
 
 	fmt.Println(banner())
 
-	err = services.Users.DeleteAccount(context.Background(), "bd33a7ba-6950-427b-abaa-c999ed39291b")
+	eliminar := services.Users.DeleteAccount(context.Background(), "3a7ae64c-4350-46a9-a5e1-d0626c196899")
 
 	user, err := services.Users.CreateAccount(context.Background(), &domain.User{
 		Name:     "Santiago",
@@ -56,6 +56,10 @@ func main() {
 
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	if eliminar != nil {
+		fmt.Println(eliminar)
 	}
 
 	if user != nil {
