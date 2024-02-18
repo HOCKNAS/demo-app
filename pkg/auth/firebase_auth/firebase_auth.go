@@ -31,6 +31,8 @@ func NewApp(credentials string) (*firebase.App, error) {
 func ShowError(err error) error {
 	if auth.IsEmailAlreadyExists(err) {
 		return domain.ErrEmailAlreadyExistsIdP
+	} else if auth.IsUserNotFound(err) {
+		return domain.ErrUserNotFoundForDeletionIdP
 	}
 
 	return err

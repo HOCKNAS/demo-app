@@ -40,3 +40,14 @@ func (fip *firebaseIdentityProvider) Create(ctx context.Context, user *domain.Us
 
 	return nil
 }
+
+func (fip *firebaseIdentityProvider) Delete(ctx context.Context, id string) error {
+
+	err := fip.authClient.DeleteUser(ctx, id)
+
+	if err != nil {
+		return firebase_auth.ShowError(err)
+	}
+
+	return nil
+}

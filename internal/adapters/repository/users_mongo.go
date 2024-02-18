@@ -8,6 +8,7 @@ import (
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
 	"github.com/HOCKNAS/demo-app/pkg/database/mongodb"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -130,4 +131,21 @@ func (r *usersRepository) Create(ctx context.Context, user *domain.User) (*domai
 	}
 
 	return toUserMongo.ToDomain(), err
+}
+
+func (r *usersRepository) Delete(ctx context.Context, id string) error {
+
+	filter := bson.M{"_id": id}
+
+	result, err := r.db.DeleteOne(ctx, filter)
+
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return domain.ErrUserNotFoundForDeletionDB
+	}
+
+	return nil
 }

@@ -42,7 +42,9 @@ func main() {
 
 	fmt.Println(banner())
 
-	user, err := services.Users.Register(context.Background(), &domain.User{
+	err = services.Users.DeleteAccount(context.Background(), "bd33a7ba-6950-427b-abaa-c999ed39291b")
+
+	user, err := services.Users.CreateAccount(context.Background(), &domain.User{
 		Name:     "Santiago",
 		LastName: "Chacon",
 		Username: "hocknas",

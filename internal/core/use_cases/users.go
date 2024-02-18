@@ -19,7 +19,7 @@ func NewUserService(repository ports.UsersRepository, identity_provider ports.Au
 	}
 }
 
-func (service *userService) Register(ctx context.Context, input *domain.User) (*domain.User, error) {
+func (service *userService) CreateAccount(ctx context.Context, input *domain.User) (*domain.User, error) {
 
 	userDatabase, err := service.repository.Create(ctx, input)
 
@@ -30,4 +30,21 @@ func (service *userService) Register(ctx context.Context, input *domain.User) (*
 	err = service.identity_provider.Create(ctx, userDatabase)
 
 	return userDatabase, err
+}
+
+func (service *userService) DeleteAccount(ctx context.Context, id string) error {
+
+	err := service.repository.Delete(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	err = service.identity_provider.Delete(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
