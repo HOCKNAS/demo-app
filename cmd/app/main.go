@@ -45,7 +45,6 @@ func main() {
 			"encoding": "json",
 			"outputPaths": ["stdout", "/tmp/logs"],
 			"errorOutputPaths": ["stderr"],
-			"initialFields": {"app": "demo-app"},
 			"encoderConfig": {
 			  "messageKey": "message",
 			  "levelKey": "level",

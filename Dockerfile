@@ -1,4 +1,4 @@
-FROM golang:1.20-buster AS builder
+FROM golang:1.22.0 AS builder
 
 RUN go version
 
@@ -10,7 +10,7 @@ COPY ../ ./
 RUN go build -o /src/app cmd/app/main.go
 RUN chmod +x /src/app
 
-FROM gcr.io/distroless/base-debian11
+FROM gcr.io/distroless/base-debian12
 
 WORKDIR /src
 
