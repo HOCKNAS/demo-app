@@ -10,11 +10,12 @@ type Services struct {
 }
 
 type Deps struct {
-	Repos *Repositories
+	Repos            *Repositories
+	IdentityProvider *IdentityProvider
 }
 
 func NewServices(deps Deps) *Services {
-	Users := usecases.NewUserService(deps.Repos.Users)
+	Users := usecases.NewUserService(deps.Repos.Users, deps.IdentityProvider.AuthManager)
 
 	return &Services{
 		Users: Users,

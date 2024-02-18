@@ -126,7 +126,7 @@ func (r *usersRepository) Create(ctx context.Context, user *domain.User) (*domai
 
 	_, err := r.db.InsertOne(ctx, toUserMongo)
 	if mongodb.IsDuplicate(err) {
-		return nil, domain.ErrUserAlreadyExists
+		return nil, domain.ErrUserAlreadyExistsDB
 	}
 
 	return toUserMongo.ToDomain(), err
