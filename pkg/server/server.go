@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/HOCKNAS/demo-app/internal/adapters/server/http_server"
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
+	"github.com/HOCKNAS/demo-app/pkg/server/http_server"
 )
 
 type Servers struct {

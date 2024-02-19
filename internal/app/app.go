@@ -8,17 +8,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/HOCKNAS/demo-app/internal/adapters/delivery/http_delivery"
 	"github.com/HOCKNAS/demo-app/internal/adapters/identity_provider"
 	"github.com/HOCKNAS/demo-app/internal/adapters/repository"
-	"github.com/HOCKNAS/demo-app/internal/adapters/server"
-	"github.com/HOCKNAS/demo-app/internal/core/domain"
 	"github.com/HOCKNAS/demo-app/internal/core/use_cases"
 	"github.com/HOCKNAS/demo-app/pkg/auth/firebase_auth"
 	"github.com/HOCKNAS/demo-app/pkg/db/mongo_db"
 	logger "github.com/HOCKNAS/demo-app/pkg/logger"
+	"github.com/HOCKNAS/demo-app/pkg/server"
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/danielgtaylor/huma/v2/adapters/humachi"
-	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 )
 
@@ -77,46 +75,29 @@ func Run() {
 
 	logger := logger.NewLogger(*config)
 
+	services := use_cases.NewServices(use_cases.Deps{
+		Repos:            repositories,
+		IdentityProvider: identity_provider,
+		Logs:             logger,
+	})
+
 	type Options struct {
 		Debug bool   `doc:"Enable debug logging"`
 		Host  string `doc:"Hostname to listen on."`
 		Port  int    `doc:"Port to listen on." short:"p" default:"8888"`
 	}
 
-	type GreetingInput struct {
-		Name string `path:"name" maxLength:"30" example:"world" doc:"Name to greet"`
-	}
-
-	type GreetingOutput struct {
-		Body struct {
-			Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
-		}
-	}
-
 	cli := huma.NewCLI(func(hooks huma.Hooks, opts *Options) {
 
-		handler := chi.NewRouter()
+		handler := http_delivery.NewHandlerHTTP(services)
 
 		srvConfig := &http.Server{
 			Addr:           ":" + "8080",
-			Handler:        handler,
+			Handler:        handler.Router,
 			ReadTimeout:    15 * time.Second,
 			WriteTimeout:   15 * time.Second,
 			MaxHeaderBytes: 1 << 20,
 		}
-
-		api := humachi.New(handler, huma.DefaultConfig("DEMO - APP", "1.0.0"))
-
-		huma.Register(api, huma.Operation{
-			OperationID: "get-greeting",
-			Summary:     "Get a greeting",
-			Method:      http.MethodGet,
-			Path:        "/greeting/{name}",
-		}, func(ctx context.Context, input *GreetingInput) (*GreetingOutput, error) {
-			resp := &GreetingOutput{}
-			resp.Body.Message = fmt.Sprintf("Hello, %s!", input.Name)
-			return resp, nil
-		})
 
 		srv := server.NewServer(srvConfig).HTTPServer
 
@@ -131,38 +112,32 @@ func Run() {
 		})
 	})
 
-	services := use_cases.NewServices(use_cases.Deps{
-		Repos:            repositories,
-		IdentityProvider: identity_provider,
-		Logs:             logger,
-	})
-
 	fmt.Println(banner())
 
 	cli.Run()
 
-	user, _ := services.Users.CreateUser(context.Background(), &domain.User{
-		Name:     "Santiago",
-		LastName: "Chacon",
-		Username: "hocknas",
-		Email:    "santiago.chacon99@gmail.com",
-		Password: "Hola123@",
-		IsAdmin:  false,
-		IsActive: true,
-	})
-	if user != nil {
-		fmt.Println(user.Email)
-	}
+	// user, _ := services.Users.CreateUser(context.Background(), &domain.User{
+	// 	Name:     "Santiago",
+	// 	LastName: "Chacon",
+	// 	Username: "hocknas",
+	// 	Email:    "santiago.chacon99@gmail.com",
+	// 	Password: "Hola123@",
+	// 	IsAdmin:  false,
+	// 	IsActive: true,
+	// })
+	// if user != nil {
+	// 	fmt.Println(user.Email)
+	// }
 
-	deactivate, _ := services.Users.DeactivateUser(context.Background(), user.ID)
-	if deactivate != nil {
-		fmt.Println(deactivate.IsActive)
-	}
+	// deactivate, _ := services.Users.DeactivateUser(context.Background(), user.ID)
+	// if deactivate != nil {
+	// 	fmt.Println(deactivate.IsActive)
+	// }
 
-	eliminar := services.Users.DeleteUser(context.Background(), user.ID)
-	if eliminar != nil {
-		fmt.Println(eliminar)
-	}
+	// eliminar := services.Users.DeleteUser(context.Background(), user.ID)
+	// if eliminar != nil {
+	// 	fmt.Println(eliminar)
+	// }
 }
 
 func banner() string {
