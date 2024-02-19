@@ -23,4 +23,4 @@ USER nonroot:nonroot
 
 ENV BANNER_PATH=/src/banner.txt
 ENV FIREBASE_PATH=/src/firebase.json
-ENTRYPOINT ["/src/app"]
+ENTRYPOINT ["/src/app", "--host", "0.0.0.0"]

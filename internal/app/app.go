@@ -105,7 +105,7 @@ func Run() {
 
 			err := srv.Start()
 			if err != nil && err != http.ErrServerClosed {
-				logger.Logger.Error("Error al iniciar el Servidor", err)
+				logger.Logger.Error("Error al iniciar el Servidor", "error", err)
 			}
 
 		})
