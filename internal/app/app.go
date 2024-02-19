@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -82,9 +81,8 @@ func Run() {
 	})
 
 	type Options struct {
-		Debug bool   `doc:"Enable debug logging"`
-		Host  string `doc:"Hostname to listen on."`
-		Port  int    `doc:"Port to listen on." short:"p" default:"8888"`
+		Host string `default:"localhost" doc:"Host to listen on"`
+		Port int    `default:"8080" doc:"Port to listen on"`
 	}
 
 	cli := huma.NewCLI(func(hooks huma.Hooks, opts *Options) {
@@ -92,7 +90,7 @@ func Run() {
 		handler := http_delivery.NewHandlerHTTP(services)
 
 		srvConfig := &http.Server{
-			Addr:           ":" + "8080",
+			Addr:           fmt.Sprintf("%s:%d", opts.Host, opts.Port),
 			Handler:        handler.Router,
 			ReadTimeout:    15 * time.Second,
 			WriteTimeout:   15 * time.Second,
@@ -102,9 +100,14 @@ func Run() {
 		srv := server.NewServer(srvConfig).HTTPServer
 
 		hooks.OnStart(func() {
-			if err := srv.Start(); err != nil && err != http.ErrServerClosed {
-				log.Fatalf("listen: %s\n", err)
+
+			fmt.Println("Starting server on http://" + srvConfig.Addr)
+
+			err := srv.Start()
+			if err != nil && err != http.ErrServerClosed {
+				logger.Logger.Error("Error al iniciar el Servidor", err)
 			}
+
 		})
 
 		hooks.OnStop(func() {
