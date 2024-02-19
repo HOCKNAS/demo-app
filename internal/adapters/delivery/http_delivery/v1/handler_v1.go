@@ -5,25 +5,31 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-type HandlerV1 struct {
-	services *use_cases.Services
-	huma     huma.API
+type Handler struct {
+	Services *use_cases.Services
+	Huma     *huma.API
 }
 
-func NewHandlerV1(services *use_cases.Services, huma huma.API) *HandlerV1 {
-	return &HandlerV1{
-		services: services,
-		huma:     huma,
+type APIServer struct {
+	RootPath string
+	Handler  huma.API
+}
+
+func NewHandler(services *use_cases.Services, huma *huma.API) *Handler {
+	return &Handler{
+		Services: services,
+		Huma:     huma,
 	}
 }
 
-func (h *HandlerV1) Init(rootPath string) {
+func (h *Handler) Init(rootPath string) {
 
-	s := APIServer{
+	api := APIServer{
 		RootPath: rootPath + "/v1",
+		Handler:  *h.Huma,
 	}
 
 	{
-		s.Greeting(h.huma)
+		h.initUsersRoutes(api)
 	}
 }

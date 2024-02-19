@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/HOCKNAS/demo-app/internal/core/ports"
 	"github.com/danielgtaylor/huma/v2"
 )
-
-type APIServer struct {
-	RootPath string
-}
 
 type GreetingInput struct {
 	Name string `path:"name" maxLength:"30" example:"world" doc:"Name to greet"`
@@ -22,7 +19,12 @@ type GreetingOutput struct {
 	}
 }
 
-func (s *APIServer) Greeting(api huma.API) {
+func (h *Handler) initUsersRoutes(api APIServer) {
+	api.RootPath += "/users"
+	api.CreateUser(api.Handler, h.Services.Users)
+}
+
+func (s *APIServer) CreateUser(api huma.API, service ports.UsersService) {
 
 	huma.Register(api, huma.Operation{
 		OperationID: "get-greeting",

@@ -41,9 +41,9 @@ func (h *Handler) initAPI() {
 
 	config := huma.DefaultConfig("DEMO-APP", "1.0.0")
 
-	huma := humagin.New(h.Router, config)
+	api := humagin.New(h.Router, config)
 
-	handlerV1 := v1.NewHandlerV1(h.Services, huma)
+	handlerV1 := v1.NewHandler(h.Services, &api)
 
 	h.Router.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
