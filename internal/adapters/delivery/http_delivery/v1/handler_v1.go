@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/HOCKNAS/demo-app/internal/core/use_cases"
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/autopatch"
 )
 
 type Handler struct {
@@ -28,6 +29,9 @@ func (h *Handler) Init(rootPath string) {
 		RootPath: rootPath + "/v1",
 		Handler:  *h.Huma,
 	}
+
+	huma.AutoRegister(*h.Huma, &api)
+	autopatch.AutoPatch(*h.Huma)
 
 	{
 		h.initUsersRoutes(api)

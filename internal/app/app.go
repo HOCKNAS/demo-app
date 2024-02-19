@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -17,11 +18,14 @@ import (
 	"github.com/HOCKNAS/demo-app/pkg/server"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 const uri = "mongodb://172.16.1.100:32120"
 
 func Run() {
+
+	fmt.Println(banner())
 
 	// Mongo
 	mongoClient, err := mongo_db.NewClient(uri, "", "")
@@ -85,16 +89,19 @@ func Run() {
 		Port int    `default:"8080" doc:"Port to listen on"`
 	}
 
+	var handler *http_delivery.Handler
+
 	cli := huma.NewCLI(func(hooks huma.Hooks, opts *Options) {
 
-		handler := http_delivery.NewHandlerHTTP(services)
+		handler = http_delivery.NewHandlerHTTP(services)
 
 		srvConfig := &http.Server{
-			Addr:           fmt.Sprintf("%s:%d", opts.Host, opts.Port),
-			Handler:        handler.Router,
-			ReadTimeout:    15 * time.Second,
-			WriteTimeout:   15 * time.Second,
-			MaxHeaderBytes: 1 << 20,
+			Addr:              fmt.Sprintf("%s:%d", opts.Host, opts.Port),
+			Handler:           handler.Router,
+			ReadTimeout:       5 * time.Second,
+			ReadHeaderTimeout: 1 * time.Second,
+			WriteTimeout:      10 * time.Second,
+			IdleTimeout:       30 * time.Second,
 		}
 
 		srv := server.NewServer(srvConfig).HTTPServer
@@ -115,7 +122,34 @@ func Run() {
 		})
 	})
 
-	fmt.Println(banner())
+	cli.Root().AddCommand(&cobra.Command{
+		Use:   "openapi",
+		Short: "Generate OpenAPI spec",
+		Run: func(cmd *cobra.Command, args []string) {
+			b, err := json.MarshalIndent(handler.GetApi().OpenAPI(), "", "  ")
+			if err != nil {
+				logger.Logger.Error("Error al generar la especificación OpenAPI", "error", err)
+				return
+			}
+
+			fileName := "openapi-spec.json"
+
+			file, err := os.Create(fileName)
+			if err != nil {
+				logger.Logger.Error("Error al crear el archivo", "error", err)
+				return
+			}
+			defer file.Close()
+
+			_, err = file.Write(b)
+			if err != nil {
+				logger.Logger.Error("Error al escribir en el archivo", "error", err)
+				return
+			}
+
+			logger.Logger.Info("La especificación OpenAPI ha sido guardada", "fileName", fileName)
+		},
+	})
 
 	cli.Run()
 
