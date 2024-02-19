@@ -1,4 +1,4 @@
-package repository
+package mongodb
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/HOCKNAS/demo-app/internal/core/domain"
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
-	"github.com/HOCKNAS/demo-app/pkg/database/mongodb"
+	"github.com/HOCKNAS/demo-app/pkg/db/mongo_db"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -128,7 +128,7 @@ func (r *usersRepository) Create(ctx context.Context, user *domain.User) (*domai
 	toUserMongo.FromDomain(user)
 
 	_, err := r.db.InsertOne(ctx, toUserMongo)
-	if mongodb.IsDuplicate(err) {
+	if mongo_db.IsDuplicate(err) {
 		return nil, domain.ErrUserAlreadyExistsDB
 	}
 

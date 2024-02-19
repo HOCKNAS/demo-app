@@ -1,10 +1,9 @@
-package logger
+package logruslog
 
 import (
 	"os"
 
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
-	logruslog "github.com/HOCKNAS/demo-app/pkg/log/logrus_log"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +13,7 @@ type logrusLogger struct {
 
 func NewLogrusLogger(config *logrus.TextFormatter) ports.Logger {
 
-	logger := logruslog.NewLogger()
+	logger := logrus.New()
 	logger.Out = os.Stdout
 	logger.SetReportCaller(true)
 	logger.SetFormatter(config)

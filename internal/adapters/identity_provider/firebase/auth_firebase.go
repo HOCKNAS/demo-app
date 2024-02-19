@@ -1,4 +1,4 @@
-package identityprovider
+package firebase
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/HOCKNAS/demo-app/internal/core/domain"
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
-	firebaseauth "github.com/HOCKNAS/demo-app/pkg/auth/firebase_auth"
+	"github.com/HOCKNAS/demo-app/pkg/auth/firebase_auth"
 )
 
 type firebaseIdentityProvider struct {
 	authClient *auth.Client
 }
 
-func NewIdentityProvider(authClient *auth.Client) ports.AuthManager {
+func NewFirebaseIdentityProvider(authClient *auth.Client) ports.AuthManager {
 	return &firebaseIdentityProvider{
 		authClient: authClient,
 	}
@@ -31,7 +31,7 @@ func (fip *firebaseIdentityProvider) Create(ctx context.Context, user *domain.Us
 	_, err := fip.authClient.CreateUser(ctx, params)
 
 	if err != nil {
-		return firebaseauth.ShowError(err)
+		return firebase_auth.ShowError(err)
 	}
 
 	return nil
@@ -42,7 +42,7 @@ func (fip *firebaseIdentityProvider) Delete(ctx context.Context, id string) erro
 	err := fip.authClient.DeleteUser(ctx, id)
 
 	if err != nil {
-		return firebaseauth.ShowError(err)
+		return firebase_auth.ShowError(err)
 	}
 
 	return nil
@@ -53,7 +53,7 @@ func (fip *firebaseIdentityProvider) Deactivate(ctx context.Context, id string) 
 	userRecord, err := fip.authClient.GetUser(ctx, id)
 
 	if err != nil {
-		return firebaseauth.ShowError(err)
+		return firebase_auth.ShowError(err)
 	}
 
 	if userRecord.Disabled {
@@ -66,7 +66,7 @@ func (fip *firebaseIdentityProvider) Deactivate(ctx context.Context, id string) 
 	_, err = fip.authClient.UpdateUser(ctx, id, params)
 
 	if err != nil {
-		return firebaseauth.ShowError(err)
+		return firebase_auth.ShowError(err)
 	}
 
 	return nil

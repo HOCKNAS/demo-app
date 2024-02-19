@@ -1,9 +1,11 @@
-package logger
+package zaplog
 
 import (
+	"encoding/json"
+
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
-	zaplog "github.com/HOCKNAS/demo-app/pkg/log/zap_log"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type zapLogger struct {
@@ -11,8 +13,13 @@ type zapLogger struct {
 }
 
 func NewZapLogger(config string) ports.Logger {
-
-	logger := zaplog.NewLogger([]byte(config))
+	var cfg zap.Config
+	if err := json.Unmarshal([]byte(config), &cfg); err != nil {
+		panic(err)
+	}
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	cfg.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+	logger := zap.Must(cfg.Build(zap.AddCaller(), zap.AddCallerSkip(1)))
 
 	return &zapLogger{
 		logger: logger,

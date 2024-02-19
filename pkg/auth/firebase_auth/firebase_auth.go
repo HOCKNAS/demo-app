@@ -1,4 +1,4 @@
-package firebaseauth
+package firebase_auth
 
 import (
 	"context"
