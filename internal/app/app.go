@@ -81,7 +81,7 @@ func Run() {
 	services := use_cases.NewServices(use_cases.Deps{
 		Repos:            repositories,
 		IdentityProvider: identity_provider,
-		Logs:             logger,
+		Logs:             logger.Logger,
 	})
 
 	type Options struct {
@@ -93,7 +93,7 @@ func Run() {
 
 	cli := huma.NewCLI(func(hooks huma.Hooks, opts *Options) {
 
-		handler = http_delivery.NewHandlerHTTP(services)
+		handler = http_delivery.NewHandlerHTTP(services, &logger.Logger)
 
 		srvConfig := &http.Server{
 			Addr:              fmt.Sprintf("%s:%d", opts.Host, opts.Port),
@@ -126,7 +126,7 @@ func Run() {
 		Use:   "openapi",
 		Short: "Generate OpenAPI spec",
 		Run: func(cmd *cobra.Command, args []string) {
-			b, err := json.MarshalIndent(handler.GetApi().OpenAPI(), "", "  ")
+			b, err := json.MarshalIndent(handler.GetHuma().OpenAPI(), "", "  ")
 			if err != nil {
 				logger.Logger.Error("Error al generar la especificación OpenAPI", "error", err)
 				return

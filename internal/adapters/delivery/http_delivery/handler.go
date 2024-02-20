@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	v1 "github.com/HOCKNAS/demo-app/internal/adapters/delivery/http_delivery/v1"
+	"github.com/HOCKNAS/demo-app/internal/core/ports"
 	"github.com/HOCKNAS/demo-app/internal/core/use_cases"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humagin"
@@ -28,16 +29,18 @@ $ curl localhost:8080/ping
 type Handler struct {
 	Services *use_cases.Services
 	Router   *gin.Engine
-	api      huma.API
+	Logger   *ports.Logger
+	huma     huma.API
 }
 
-func NewHandlerHTTP(services *use_cases.Services) *Handler {
+func NewHandlerHTTP(services *use_cases.Services, logger *ports.Logger) *Handler {
 
 	gin.SetMode(gin.ReleaseMode)
 
 	handler := &Handler{
 		Services: services,
 		Router:   gin.Default(),
+		Logger:   logger,
 	}
 
 	config := huma.DefaultConfig("DEMO-APP", "1.0.0")
@@ -57,7 +60,7 @@ func NewHandlerHTTP(services *use_cases.Services) *Handler {
 	config.Formats["application/yaml"] = yamlFormat
 	config.Formats["yaml"] = yamlFormat
 
-	handler.api = humagin.New(handler.Router, config)
+	handler.huma = humagin.New(handler.Router, config)
 	handler.initMiddleware()
 	handler.initAPI()
 
@@ -73,7 +76,7 @@ func (h *Handler) initMiddleware() {
 
 func (h *Handler) initAPI() {
 
-	handlerV1 := v1.NewHandler(h.Services, &h.api)
+	handlerV1 := v1.NewHandler(h.Services, &h.huma, h.Logger)
 
 	h.Router.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
@@ -90,6 +93,6 @@ func (h *Handler) GetRouter() *gin.Engine {
 	return h.Router
 }
 
-func (h *Handler) GetApi() huma.API {
-	return h.api
+func (h *Handler) GetHuma() huma.API {
+	return h.huma
 }

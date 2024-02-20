@@ -1,8 +1,6 @@
 package use_cases
 
 import (
-	logger "github.com/HOCKNAS/demo-app/pkg/logger"
-
 	identityprovider "github.com/HOCKNAS/demo-app/internal/adapters/identity_provider"
 	"github.com/HOCKNAS/demo-app/internal/adapters/repository"
 	"github.com/HOCKNAS/demo-app/internal/core/ports"
@@ -15,11 +13,11 @@ type Services struct {
 type Deps struct {
 	Repos            *repository.Repositories
 	IdentityProvider *identityprovider.IdentityProvider
-	Logs             *logger.Logger
+	Logs             ports.Logger
 }
 
 func NewServices(deps Deps) *Services {
-	Users := NewUserService(deps.Repos.UsersRepository, deps.IdentityProvider.AuthManager, deps.Logs.Logger)
+	Users := NewUserService(deps.Repos.UsersRepository, deps.IdentityProvider.AuthManager, deps.Logs)
 	return &Services{
 		Users: Users,
 	}
